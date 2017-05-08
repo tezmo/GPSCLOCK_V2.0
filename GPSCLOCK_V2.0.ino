@@ -17,6 +17,7 @@
 #define GPSClockTx   11
 #define N_LEDS       117          // 13 wide x 9 high grid            !!!MAX 255!!!
 #define colorAmount  (4*(sizeof(colors)/sizeof(uint32_t)))
+// A4 & A5 for i2c of the DS3232
 
 
 SoftwareSerial SerialGPS = SoftwareSerial(GPSclockRX, GPSClockTx);
@@ -29,6 +30,7 @@ int prevMin = 0;
 Adafruit_NeoPixel grid = Adafruit_NeoPixel(N_LEDS, RGBLEDPIN, NEO_GRB + NEO_KHZ400);
 int intBrightness = 255; // the brightness of the clock (0 = off and 255 = 100%)
 int offset = 2; //(GMT+1, add another 1 for summertime) -- changeable with pushable encoder
+
 
 //Clock Colours
 uint32_t colorVariable; //current colour
@@ -106,7 +108,9 @@ void setup()
   //startup sequence
   colorWipe(colorBlack, 0);
   paintRandomSelected(arrNAME);
-  delay(5000);
+  colorVariable = colors[0];
+  delay(3000);
+  
 }
 
 void loop() {
@@ -147,11 +151,19 @@ void loop() {
     }
     if (newPosition != oldPosition) {
       oldPosition = newPosition;
+      colorVariable = colors[(oldPosition / 4)];
+
+      //update now to show color change
+      if (colorVariable != colorMore) {
+        displayTime();
+      }
+      else if (colorVariable == colorMore) {
+        displayTimeRandom();
+      }
     }
-    colorVariable = colors[(oldPosition / 4)];
   }
 
-  // test to see if a forward button is being held down for time setting
+  // encoder rotation for time
   if (digitalRead(TimeChangePIN) == LOW) {
     if (encoderPushed != digitalRead(TimeChangePIN)) {
       myEnc.write(0);
@@ -172,10 +184,19 @@ void loop() {
     }
     if (timezonePosition != old2Position) {
       old2Position = timezonePosition;
+
+      Serial.print("  Timezone: ");
+      Serial.println(offset);
+      offset = old2Position / 4;
+
+      //update now to show timezone change
+      if (colorVariable != colorMore) {
+        displayTime();
+      }
+      else if (colorVariable == colorMore) {
+        displayTimeRandom();
+      }
     }
-    offset = old2Position / 4;
-    Serial.print("  Timezone: ");
-    Serial.println(offset);
   }
 
   grid.setBrightness(intBrightness);
@@ -184,10 +205,10 @@ void loop() {
     if (minute() > prevMin) { //update the display only if at least 60 seconds have passed
       prevMin = minute();
       digitalClockDisplay();
-      if (colorVariable!=colorMore) {
+      if (colorVariable != colorMore) {
         displayTime();
       }
-      else if(colorVariable==colorMore) {
+      else if (colorVariable == colorMore) {
         displayTimeRandom();
       }
     }
