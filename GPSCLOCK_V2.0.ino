@@ -58,7 +58,7 @@ byte minutesArray [12] [22] {
   {90, 89, 88, 87, 85, 84, 83, 82, 81, 80, 79, 65, 66, 67, 68, 255},                              //FIVE MINUTES PAST
   {106, 105, 104, 65, 66, 67, 68, 255},                                                           //TEN  PAST
   {109, 91, 92, 93, 94, 95, 96, 97, 65, 66, 67, 68, 255},                                         //A QUARTER PAST
-  {98, 99, 100, 101, 102, 103, 85, 84, 83, 82, 81, 80, 79, 5, 66, 67, 68, 255},                   //TWENTY MINUTES PAST
+  {98, 99, 100, 101, 102, 103, 85, 84, 83, 82, 81, 80, 79, 65, 66, 67, 68, 255},                   //TWENTY MINUTES PAST
   {98, 99, 100, 101, 102, 103, 90, 89, 88, 87, 85, 84, 83, 82, 81, 80, 79, 65, 66, 67, 68, 255},  //TWENTY FIVE MINUTES PAST
   {110, 109, 108, 107, 65, 66, 67, 68, 255},                                                      //HALF PAST
   {98, 99, 100, 101, 102, 103, 90, 89, 88, 87, 85, 84, 83, 82, 81, 80, 79, 76, 77, 255},          //TWENTY FIVE MINUTES TO
@@ -211,7 +211,7 @@ void loop() {
   grid.setBrightness(intBrightness);
 
   if (timeStatus() != timeNotSet) {
-    if (minute() > prevMin) { //update the display only if at least 60 seconds have passed
+    if (minute() != prevMin) { //update the display only if at least 60 seconds have passed
       prevMin = minute();
       digitalClockDisplay();
       if (colorVariable != colorMore) {
@@ -340,7 +340,7 @@ void displayTime() {
 
   if (cMins == 0) {
     paintWord(minutesArray[11], colorBlack); //turn off FIVE MINUTES TO
-    paintWord(minutesArray[cMins], colorVariable); //o'clock
+    paintWord(minutesArray[0], colorVariable); //o'clock
   }
   else {
     paintWord(minutesArray[cMins - 1], colorBlack); //turn off previous minute leds
@@ -365,7 +365,7 @@ void displayTimeRandom() {
     }
   }
   else { // minutes < 35
-    if (onHour == 0) { // exception due to start of aaray
+    if (onHour == 0) { // exception due to start of array
       paintWord(hoursArray[11], colorBlack); //turn off previous  11 oclock, we're now at 12 (loopback)
       paintRandomSelected(hoursArray[onHour]); //starting again from start of array
     }
@@ -379,7 +379,7 @@ void displayTimeRandom() {
 
   if (cMins == 0) {
     paintWord(minutesArray[11], colorBlack); //turn off FIVE MINUTES TO
-    paintRandomSelected(minutesArray[cMins]); //o'clock
+    paintRandomSelected(minutesArray[0]); //o'clock
   }
   else {
     paintWord(minutesArray[cMins - 1], colorBlack); //turn off previous minute leds
