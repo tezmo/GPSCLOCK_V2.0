@@ -43,8 +43,9 @@ const PROGMEM uint32_t colorPurple = grid.Color(255, 0, 255);
 const PROGMEM uint32_t colorYellow = grid.Color(125, 255, 0);
 const PROGMEM uint32_t colorWhatever = grid.Color(102, 51, 204);
 const PROGMEM uint32_t colorMore = grid.Color(255, 153, 0);
-const PROGMEM uint32_t colors[] = {colorWhite, colorRed, colorGreen, colorBlue, colorPurple, colorYellow, colorWhatever, colorMore}; //cycle through with encoder
-int AllOrNothing[] = {30, 127, 255};
+uint32_t colorMix;
+const PROGMEM uint32_t colors[] = {colorWhite, colorRed, colorGreen, colorBlue, colorPurple, colorYellow, colorWhatever, colorMore, colorMix}; //cycle through with encoder
+int AllOrNothing[] = {60, 157, 255};
 
 //Separate words
 byte arrITIS[] = {116, 115, 113, 112, 255};
@@ -90,8 +91,8 @@ void setup()
   while (!Serial) ; // Needed for Leonardo only
   SerialGPS.begin(9600);
   Serial.println("Booting ... ");
-  delay(200);
 
+  delay(200);
 
   // initialize the buttons
   pinMode(TimeChangePIN, INPUT_PULLUP); //temp pulled up to not have the low on the button..
@@ -108,9 +109,10 @@ void setup()
   //startup sequence
   colorWipe(colorBlack, 0);
   paintRandomSelected(arrNAME);
+  fadeOut(25);
   colorVariable = colors[0];
-  delay(3000);
-  
+
+
 }
 
 void loop() {
@@ -129,7 +131,7 @@ void loop() {
       }
     }
   }
-  setTime(RTC.get() + (offset * SECS_PER_HOUR));
+  setTime(RTC.get());
 
 
   if (digitalRead(TimeChangePIN) == HIGH) {
@@ -153,13 +155,17 @@ void loop() {
       oldPosition = newPosition;
       colorVariable = colors[(oldPosition / 4)];
 
+      colorWipe(colorBlack, 0);
+      delay(100);
+
       //update now to show color change
-      if (colorVariable != colorMore) {
-        displayTime();
-      }
-      else if (colorVariable == colorMore) {
+      if (colorVariable == colorMix) {
         displayTimeRandom();
       }
+      else if (colorVariable != colorMix) {
+        displayTime();
+      }
+
     }
   }
 
@@ -189,12 +195,15 @@ void loop() {
       Serial.println(offset);
       offset = old2Position / 4;
 
-      //update now to show timezone change
-      if (colorVariable != colorMore) {
-        displayTime();
-      }
-      else if (colorVariable == colorMore) {
+      colorWipe(colorBlack, 0);
+      delay(100);
+
+      //update now to show color change
+      if (colorVariable == colorMix) {
         displayTimeRandom();
+      }
+      else if (colorVariable != colorMix) {
+        displayTime();
       }
     }
   }
@@ -217,7 +226,7 @@ void loop() {
 
 void digitalClockDisplay() {
   // digital clock display of the time
-  Serial.print(hour());
+  Serial.print(hour()+offset);
   printDigits(minute());
   printDigits(second());
   Serial.print(" ");
@@ -303,7 +312,7 @@ void fadeOut(int time) {
 void displayTime() {
   paintWord(arrITIS, colorVariable);
 
-  int onHour = hour() % 12;
+  int onHour = (hour()+offset) % 12;
 
   // Set the HOURS first
   if (minute() >= 35) { //now its TO the next hour
@@ -342,7 +351,7 @@ void displayTime() {
 void displayTimeRandom() {
   paintRandomSelected(arrITIS);
 
-  int onHour = hour() % 12;
+  int onHour = (hour()+offset) % 12;
 
   // Set the HOURS first
   if (minute() >= 35) { //now its TO the next hour
