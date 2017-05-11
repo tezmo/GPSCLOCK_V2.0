@@ -28,7 +28,7 @@ long old2Position = -999;
 boolean encoderPushed = false;
 int prevMin = 0;
 Adafruit_NeoPixel grid = Adafruit_NeoPixel(N_LEDS, RGBLEDPIN, NEO_GRB + NEO_KHZ400);
-int intBrightness = 255; // the brightness of the clock (0 = off and 255 = 100%)
+int intBrightness = 200; // the brightness of the clock (0 = off and 255 = 100%)
 int offset = 2; //(GMT+1, add another 1 for summertime) -- changeable with pushable encoder
 
 
@@ -76,8 +76,8 @@ byte hoursArray [12] [7] {
   {56, 55, 54, 53, 52, 255}, //THREE
   {39, 40, 41, 42, 255},   //FOUR
   {43, 44, 45, 46, 255},   //FIVE
-  {47, 48, 49, 50, 51, 255}, //SIX
-  {38, 37, 36, 255},       //SEVEN
+  {38, 37, 36, 255},       //SIX
+  {47, 48, 49, 50, 51, 255}, //SEVEN
   {35, 34, 33, 32, 31, 255}, //EIGHT
   {29, 28, 27, 26, 255},   //NINE
   {14, 15, 16, 255},       //TEN
@@ -124,7 +124,7 @@ void loop() {
       byte Month, Day, Hour, Minute, Second;
       gps.crack_datetime(&Year, &Month, &Day, &Hour, &Minute, &Second, NULL, &age);
       if (age < 500) {
-        //Serial.println("GPS time available with good age - updated RTC");
+        Serial.println("GPS time available with good age - updated RTC");
         // set the Time to the latest GPS reading
         setTime(Hour, Minute, Second, Day, Month, Year);
         RTC.set(now());
